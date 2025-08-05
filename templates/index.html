@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Downloader</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transition duration-300 ease-in-out hover:shadow-red-300">
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+      <img src="https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg" alt="YouTube Logo" class="h-10">
+    </div>
+
+    <!-- Form -->
+     <form id="download-form" class="space-y-5">
+      <input type="text" name="url" placeholder="Paste YouTube URL here..." required
+             class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition" />
+
+      <select name="format" required
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition">
+        <option value="audio">🎧 Audio (MP3)</option>
+        <option value="video">🎥 Video (MP4)</option>
+      </select>
+
+      <button type="submit"
+              class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl transition duration-300">
+        ⬇️ Download
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <p class="text-xs text-gray-500 mt-6 text-center">
+      ⚠️ For educational use only. Not affiliated with YouTube.<br>
+      Made with ❤️ by Ayushi
+    </p>
+  </div>
+
+  <!-- Loader (hidden by default) -->
+    <div id="loader" class="flex justify-center mb-6 hidden">
+    <svg class="animate-spin h-8 w-8 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg>
+    </div>
+
+    <p id="success-message" class="hidden text-green-600 font-medium text-center mt-4">
+      ✅ Download completed successfully!
+    </p>
+
+
+<script>
+  const form = document.getElementById('download-form');
+  const loader = document.getElementById('loader');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    loader.classList.remove('hidden');
+
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        alert('Download failed.');
+        loader.classList.add('hidden');
+        return;
+      }
+
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'downloaded_file';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?(.+)"?/);
+        if (match) {
+          filename = match[1];
+        }
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Something went wrong: ' + err.message);
+    } finally {
+      loader.classList.add('hidden');
+    }
+  });
+</script>
+
+
+
+
+</body>
+</html>
