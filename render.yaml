@@ -1,6 +1,7 @@
 services:
   - type: web
-    name: youtube-flask-app
+    name: youtube-media-downloader
     env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
+    pythonVersion: "3.9"
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
