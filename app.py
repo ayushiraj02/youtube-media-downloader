@@ -4,6 +4,9 @@ import os
 import uuid
 import glob
 
+import base64
+import tempfile
+
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -31,7 +34,15 @@ def index():
             ydl_opts['postprocessors'] = [{
                 'key': 'FFmpegVideoConvertor',
                 'preferedformat': 'mp4',
+                
             }]
+        
+        if 'YT_COOKIES_BASE64' in os.environ:
+            cookie_data = base64.b64decode(os.environ['YT_COOKIES_BASE64']).decode()
+            with tempfile.NamedTemporaryFile(mode='w+', suffix='.txt', delete=True) as f:
+                f.write(cookie_data)
+                f.flush()
+                ydl_opts['cookiefile'] = f.name
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
